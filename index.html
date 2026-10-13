@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>训练记录</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3efe6;
+    --ink: #1c1915;
+    --muted: #5e584e;
+    --line: #ddd4c6;
+    --card: #fffdf8;
+    --accent: #c4511a;
+    --accent-ink: #fff8f3;
+    --ok: #1f6b45;
+    --ok-bg: #e5f3eb;
+    --warn: #8a4b12;
+    --warn-bg: #f8ecd9;
+    --danger: #9d2c2c;
+    --shadow: 0 1px 0 rgba(28, 25, 21, 0.04);
+    --input: #fffdf8;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141311;
+      --ink: #f4efe6;
+      --muted: #b3aa9d;
+      --line: #3a342c;
+      --card: #1e1c19;
+      --accent: #e3884d;
+      --accent-ink: #1c1008;
+      --ok: #8dceab;
+      --ok-bg: #1a2c22;
+      --warn: #e3b56a;
+      --warn-bg: #2c2418;
+      --danger: #f0a0a0;
+      --shadow: none;
+      --input: #161411;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141311;
+    --ink: #f4efe6;
+    --muted: #b3aa9d;
+    --line: #3a342c;
+    --card: #1e1c19;
+    --accent: #e3884d;
+    --accent-ink: #1c1008;
+    --ok: #8dceab;
+    --ok-bg: #1a2c22;
+    --warn: #e3b56a;
+    --warn-bg: #2c2418;
+    --danger: #f0a0a0;
+    --shadow: none;
+    --input: #161411;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    min-height: 100vh;
+  }
+  button, input, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  .wrap {
+    width: min(560px, 100%);
+    margin: 0 auto;
+    padding: 16px 16px calc(148px + env(safe-area-inset-bottom));
+  }
+  header.top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+    font-weight: 700;
+    font-size: 34px;
+    letter-spacing: 0.02em;
+    line-height: 0.95;
+    margin: 0;
+  }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .icon-btn, .seg button, .day button, .linkish, .step, .save, .file-btn {
+    border: 1px solid var(--line);
+    background: var(--card);
+    border-radius: 10px;
+  }
+  .icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+  }
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .tabs button {
+    min-height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: transparent;
+    font-weight: 600;
+  }
+  .tabs button[aria-selected="true"] {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .banner {
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    background: var(--warn-bg);
+    color: var(--warn);
+    font-size: 14px;
+  }
+  .banner.quiet {
+    background: var(--card);
+    color: var(--muted);
+    border: 1px solid var(--line);
+  }
+  .banner.bad { background: var(--warn-bg); color: var(--danger); }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+  .row-head, .spread, .sym-row, .weight-line, .hist-top, .tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  label.field { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  input[type="date"], input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    background: var(--input);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 16px;
+  }
+  textarea { min-height: 72px; resize: vertical; }
+  .days { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .days button { min-height: 44px; font-weight: 600; }
+  .days button[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .sym-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .stepper { display: flex; align-items: center; gap: 4px; }
+  .step {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    font-size: 22px;
+    line-height: 1;
+  }
+  .stepper input[type="text"] {
+    width: 64px;
+    flex: 0 0 64px;
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .ex { padding: 12px 0; border-top: 1px solid var(--line); }
+  .ex:first-child { border-top: 0; padding-top: 0; }
+  .ex-name { font-weight: 600; }
+  .ex-en { color: var(--muted); font-size: 13px; }
+  .check {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    accent-color: var(--accent);
+  }
+  .weight-line { margin-top: 8px; flex-wrap: wrap; }
+  .weight-line input { max-width: 120px; text-align: center; font-variant-numeric: tabular-nums; }
+  .unit { color: var(--muted); font-size: 14px; }
+  .sets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .sets input { text-align: center; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .src { color: var(--muted); font-size: 12px; }
+  .paused-row { align-items: center; }
+  .linkish {
+    min-height: 40px;
+    padding: 0 12px;
+    color: var(--accent);
+    background: transparent;
+  }
+  .savebar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  }
+  .savebar .inner { width: min(560px, 100%); margin: 0 auto; }
+  .save {
+    width: 100%;
+    min-height: 48px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+    font-weight: 600;
+    font-size: 17px;
+  }
+  .save:disabled { opacity: 0.45; }
+  .status { min-height: 1.2em; margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+  .status.err { color: var(--danger); }
+  h2 {
+    font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+    font-size: 26px;
+    margin: 8px 0 10px;
+  }
+  .tools { flex-wrap: wrap; margin-bottom: 8px; }
+  .tools button, .file-btn {
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+  .file-btn { display: inline-block; }
+  .seq { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .delta { font-size: 13px; color: var(--muted); }
+  .pill {
+    font-size: 12px;
+    border-radius: 999px;
+    padding: 2px 8px;
+    background: var(--warn-bg);
+    color: var(--warn);
+  }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); }
+  details.session { margin-bottom: 8px; }
+  details.session summary { cursor: pointer; list-style: none; }
+  details.session summary::-webkit-details-marker { display: none; }
+  .mini { font-size: 14px; margin: 8px 0 0; }
+  .actions { display: flex; gap: 8px; margin-top: 10px; }
+  .hidden { display: none !important; }
+  .note-line { white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>训练记录</h1>
+      <div class="sub" id="store-line">数据在这台浏览器里</div>
+    </div>
+    <button class="icon-btn" id="theme-btn" type="button">深色</button>
+  </header>
+  <div class="tabs" role="tablist">
+    <button type="button" id="tab-today" role="tab" aria-selected="true">今天</button>
+    <button type="button" id="tab-history" role="tab" aria-selected="false">历史</button>
+  </div>
+  <div id="app"></div>
+</div>
+<div class="savebar" id="savebar">
+  <div class="inner">
+    <button class="save" id="save-btn" type="button">保存这次训练</button>
+    <p class="status" id="status"></p>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "xd-training-log-v1";
+const THEME_KEY = "xd-training-theme";
+
+const EX = [
+  { ex: "Machine Pulldown", zh: "高位下拉机", start: "40", hint: "下拉到下巴或锁骨前，不拉到颈后" },
+  { ex: "Machine Chest Press", zh: "坐姿推胸机", start: "25", hint: "手握把起点不超过胸线" },
+  { ex: "Machine Row", zh: "坐姿划船机", start: "30", hint: "不让肩被拉向前" },
+  { ex: "Machine Chest Fly", zh: "蝴蝶机夹胸", start: "15", hint: "轻重量，手臂不要拉到身后过深" },
+  { ex: "Machine Tricep Press", zh: "三头肌推举机", start: "40", hint: "" },
+  { ex: "Machine Incline Bicep Curl", zh: "斜托二头弯举机", start: "20", hint: "" },
+  { ex: "Machine Seated Leg Curl", zh: "坐姿腿弯举机", start: "35", hint: "" },
+  { ex: "Machine Leg Press", zh: "腿举机", start: "70", hint: "小幅度，不锁膝" },
+  { ex: "Machine Seated Leg Extension", zh: "坐姿腿屈伸机", start: "25", hint: "左膝痛时轻重量、小幅度，有刺痛就跳过" },
+  { ex: "Machine Hip Abduction", zh: "髋外展机", start: "30", hint: "" },
+  { ex: "Machine Hip Adduction", zh: "髋内收机", start: "30", hint: "" },
+  { ex: "Machine Back Extension", zh: "背部伸展机", start: "30", hint: "小幅度" },
+  { ex: "Machine Crunch", zh: "卷腹机", start: "25", hint: "" },
+  { ex: "Machine Torso Rotation", zh: "躯干旋转机", start: "20", hint: "小幅度" },
+  { ex: "Machine Shoulder Press", zh: "肩部推举机", start: "", hint: "暂停中。恢复时用最低重量，起点不高于肩", paused: true },
+  { ex: "Machine Lateral Raise", zh: "侧平举机", start: "", hint: "暂停中。恢复时用最低重量，只抬到与肩同高", paused: true }
+];
+const BY_EX = Object.fromEntries(EX.map((item) => [item.ex, item]));
+const DAYS = {
+  "周二": ["Machine Leg Press", "Machine Chest Press", "Machine Pulldown", "Machine Seated Leg Curl", "Machine Back Extension", "Machine Crunch"],
+  "周四": ["Machine Hip Abduction", "Machine Hip Adduction", "Machine Seated Leg Extension", "Machine Shoulder Press", "Machine Row", "Machine Tricep Press", "Machine Torso Rotation"],
+  "周日": ["Machine Leg Press", "Machine Seated Leg Curl", "Machine Pulldown", "Machine Chest Fly", "Machine Lateral Raise", "Machine Incline Bicep Curl", "Machine Crunch"]
+};
+
+const state = {
+  view: "today",
+  date: todayISO(),
+  day: "周二",
+  symptoms: { calf: 0, knee: 0, shoulder: 0 },
+  note: "",
+  rows: [],
+  dirty: false,
+  sessions: {},
+  storageOk: true,
+  confirmDelete: "",
+  status: "",
+  statusErr: false
+};
+
+const app = document.getElementById("app");
+const saveBtn = document.getElementById("save-btn");
+const statusEl = document.getElementById("status");
+const savebar = document.getElementById("savebar");
+
+function todayISO() {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
+function autoDay(date) {
+  const weekday = new Date(date + "T12:00:00").getDay();
+  if (weekday === 2) return "周二";
+  if (weekday === 4) return "周四";
+  if (weekday === 0) return "周日";
+  return "周二";
+}
+
+function clampScore(value) {
+  const number = Math.round(Number(value));
+  if (!Number.isFinite(number)) return 0;
+  return Math.min(10, Math.max(0, number));
+}
+
+function loadStore() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    state.sessions = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    state.storageOk = true;
+  } catch (error) {
+    state.sessions = {};
+    state.storageOk = false;
+  }
+}
+
+function persistStore() {
+  const dates = Object.keys(state.sessions).sort();
+  if (dates.length > 500) {
+    dates.slice(0, dates.length - 500).forEach((date) => delete state.sessions[date]);
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.sessions));
+}
+
+function sessionList() {
+  return Object.values(state.sessions)
+    .filter((doc) => doc && doc.date)
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+}
+
+function previousEntry(ex, date) {
+  const older = sessionList()
+    .filter((doc) => doc.date < date)
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
+  for (const doc of older) {
+    const found = (doc.entries || []).find((entry) => entry.ex === ex);
+    if (found) return found;
+  }
+  return null;
+}
+
+function buildRows(day, date, doc) {
+  return (DAYS[day] || DAYS["周二"]).map((ex) => {
+    const meta = BY_EX[ex];
+    const saved = (doc && doc.entries || []).find((entry) => entry.ex === ex);
+    if (saved) {
+      return {
+        ex, zh: meta.zh, paused: !!meta.paused, hint: meta.hint,
+        done: true, open: true, w: String(saved.w ?? ""), sets: String(saved.sets ?? "2"),
+        reps: String(saved.reps ?? "10"), note: String(saved.note ?? ""), source: "saved"
+      };
+    }
+    const prev = previousEntry(ex, date);
+    return {
+      ex, zh: meta.zh, paused: !!meta.paused, hint: meta.hint,
+      done: false,
+      open: !meta.paused,
+      w: prev ? String(prev.w ?? "") : String(meta.start ?? ""),
+      sets: prev ? String(prev.sets ?? "2") : "2",
+      reps: prev ? String(prev.reps ?? "10") : "10",
+      note: "",
+      source: prev ? "prev" : (meta.start ? "start" : "none")
+    };
+  });
+}
+
+function clearStatus() {
+  state.status = "";
+  state.statusErr = false;
+}
+
+function loadForDate(date) {
+  clearStatus();
+  const doc = state.sessions[date];
+  state.date = date;
+  state.day = doc && DAYS[doc.day] ? doc.day : autoDay(date);
+  state.symptoms = {
+    calf: clampScore(doc && doc.symptoms ? doc.symptoms.calf : 0),
+    knee: clampScore(doc && doc.symptoms ? doc.symptoms.knee : 0),
+    shoulder: clampScore(doc && doc.symptoms ? doc.symptoms.shoulder : 0)
+  };
+  state.note = doc ? String(doc.note ?? "") : "";
+  state.rows = buildRows(state.day, date, doc || null);
+  state.dirty = false;
+}
+
+function setDay(day) {
+  if (!DAYS[day] || day === state.day) return;
+  clearStatus();
+  state.day = day;
+  const doc = state.sessions[state.date];
+  const sameDay = doc && doc.day === day ? doc : null;
+  state.rows = buildRows(day, state.date, sameDay);
+  state.dirty = true;
+}
+
+function collectEntries(rows) {
+  const entries = [];
+  rows.forEach((row) => {
+    if (row.paused && !row.open) return;
+    if (!row.done) return;
+    const weight = String(row.w ?? "").trim();
+    if (!weight) return;
+    entries.push({
+      ex: row.ex,
+      zh: row.zh,
+      w: weight,
+      sets: String(row.sets ?? "").trim(),
+      reps: String(row.reps ?? "").trim(),
+      note: String(row.note ?? "").trim()
+    });
+  });
+  return entries;
+}
+
+function buildDoc(snapshot) {
+  return {
+    v: 1,
+    date: snapshot.date,
+    day: snapshot.day,
+    symptoms: {
+      calf: clampScore(snapshot.symptoms.calf),
+      knee: clampScore(snapshot.symptoms.knee),
+      shoulder: clampScore(snapshot.symptoms.shoulder)
+    },
+    entries: collectEntries(snapshot.rows),
+    note: String(snapshot.note ?? "").trim(),
+    synced: false,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function hasContent(doc) {
+  return doc.entries.length > 0 || doc.note || doc.symptoms.calf || doc.symptoms.knee || doc.symptoms.shoulder;
+}
+
+function weightSeries() {
+  const chrono = sessionList().slice().reverse();
+  return EX.map((meta) => {
+    const points = [];
+    chrono.forEach((doc) => {
+      (doc.entries || []).forEach((entry) => {
+        if (entry.ex === meta.ex && String(entry.w ?? "").trim()) {
+          points.push({ date: doc.date, w: String(entry.w).trim() });
+        }
+      });
+    });
+    return { meta, points };
+  }).filter((item) => item.points.length);
+}
+
+function el(tag, attrs, children) {
+  const node = document.createElement(tag);
+  Object.entries(attrs || {}).forEach(([key, value]) => {
+    if (value == null || value === false) return;
+    if (key === "class") node.className = value;
+    else if (key === "text") node.textContent = value;
+    else if (key.startsWith("on") && typeof value === "function") node.addEventListener(key.slice(2), value);
+    else if (value === true) node.setAttribute(key, "");
+    else node.setAttribute(key, String(value));
+  });
+  (children || []).forEach((child) => {
+    if (child) node.appendChild(child);
+  });
+  return node;
+}
+
+function symptomControl(key, label) {
+  const input = el("input", { type: "text", inputmode: "numeric", "aria-label": label, value: String(state.symptoms[key]) });
+  input.addEventListener("input", () => {
+    state.symptoms[key] = clampScore(input.value);
+    state.dirty = true;
+    paintShoulder();
+    paintChrome();
+  });
+  input.addEventListener("change", () => {
+    state.symptoms[key] = clampScore(input.value);
+    input.value = String(state.symptoms[key]);
+  });
+  const minus = el("button", { class: "step", type: "button", text: "−", "aria-label": label + "减一" });
+  const plus = el("button", { class: "step", type: "button", text: "+", "aria-label": label + "加一" });
+  minus.addEventListener("click", () => {
+    state.symptoms[key] = clampScore(state.symptoms[key] - 1);
+    input.value = String(state.symptoms[key]);
+    state.dirty = true;
+    paintShoulder();
+    paintChrome();
+  });
+  plus.addEventListener("click", () => {
+    state.symptoms[key] = clampScore(state.symptoms[key] + 1);
+    input.value = String(state.symptoms[key]);
+    state.dirty = true;
+    paintShoulder();
+    paintChrome();
+  });
+  return el("div", { class: "sym-line" }, [
+    el("div", { class: "ex-name", text: label }),
+    el("div", { class: "stepper" }, [minus, input, plus])
+  ]);
+}
+
+function sourceText(row) {
+  if (row.source === "prev") return "上次 " + row.w + " lb";
+  if (row.source === "start") return "建议 " + row.w + " lb";
+  if (row.source === "saved") return "已记录";
+  return "";
+}
+
+function exerciseBlock(row) {
+  if (row.paused && !row.open) {
+    const openBtn = el("button", { class: "linkish", type: "button", text: "仍要记录" });
+    openBtn.addEventListener("click", () => {
+      row.open = true;
+      state.dirty = true;
+      render();
+    });
+    return el("div", { class: "ex" }, [
+      el("div", { class: "spread paused-row" }, [
+        el("div", {}, [
+          el("div", { class: "ex-name", text: "⏸ " + row.zh }),
+          el("div", { class: "ex-en", text: row.ex })
+        ]),
+        openBtn
+      ]),
+      row.hint ? el("div", { class: "hint", text: row.hint }) : null
+    ]);
+  }
+
+  const box = el("input", { class: "check", type: "checkbox", "aria-label": "完成 " + row.zh });
+  if (row.done) box.checked = true;
+  box.addEventListener("change", () => {
+    row.done = box.checked;
+    state.dirty = true;
+    paintChrome();
+  });
+
+  const weight = el("input", { type: "text", inputmode: "decimal", "aria-label": row.zh + "重量", value: row.w });
+  const sets = el("input", { type: "text", inputmode: "numeric", "aria-label": row.zh + "组数", value: row.sets });
+  const reps = el("input", { type: "text", inputmode: "numeric", "aria-label": row.zh + "次数", value: row.reps });
+  const note = el("input", { type: "text", "aria-label": row.zh + "备注", value: row.note, placeholder: "这个动作的备注" });
+  const mark = () => {
+    row.done = true;
+    box.checked = true;
+    state.dirty = true;
+    paintChrome();
+  };
+  weight.addEventListener("input", () => { row.w = weight.value; mark(); });
+  sets.addEventListener("input", () => { row.sets = sets.value; mark(); });
+  reps.addEventListener("input", () => { row.reps = reps.value; mark(); });
+  note.addEventListener("input", () => { row.note = note.value; mark(); });
+
+  const minus = el("button", { class: "step", type: "button", text: "−", "aria-label": row.zh + "减 5 磅" });
+  const plus = el("button", { class: "step", type: "button", text: "+", "aria-label": row.zh + "加 5 磅" });
+  const bump = (delta) => {
+    const current = Number(String(row.w).trim());
+    const next = (Number.isFinite(current) ? current : 0) + delta;
+    row.w = String(Math.max(0, next));
+    weight.value = row.w;
+    mark();
+  };
+  minus.addEventListener("click", () => bump(-5));
+  plus.addEventListener("click", () => bump(5));
+
+  const src = sourceText(row);
+  return el("div", { class: "ex" }, [
+    el("div", { class: "spread" }, [
+      el("div", {}, [
+        el("div", { class: "ex-name", text: row.zh }),
+        el("div", { class: "ex-en", text: row.ex })
+      ]),
+      box
+    ]),
+    el("div", { class: "weight-line" }, [
+      minus,
+      weight,
+      plus,
+      el("span", { class: "unit", text: "lb" }),
+      src ? el("span", { class: "src", text: src }) : null
+    ]),
+    el("div", { class: "sets" }, [
+      labeledInput("组", sets),
+      labeledInput("次", reps)
+    ]),
+    note,
+    row.hint ? el("div", { class: "hint", text: row.hint }) : null
+  ]);
+}
+
+function labeledInput(label, input) {
+  return el("label", {}, [
+    el("div", { class: "field", text: label }),
+    input
+  ]);
+}
+
+function renderToday() {
+  const dateInput = el("input", { type: "date", value: state.date, "aria-label": "训练日期" });
+  dateInput.addEventListener("change", () => {
+    if (!dateInput.value) return;
+    if (state.dirty && !window.confirm("这一天还有未保存的修改，要离开吗？")) {
+      dateInput.value = state.date;
+      return;
+    }
+    loadForDate(dateInput.value);
+    render();
+  });
+
+  const dayButtons = ["周二", "周四", "周日"].map((day) => {
+    const button = el("button", { type: "button", text: day, "aria-pressed": state.day === day ? "true" : "false" });
+    button.addEventListener("click", () => {
+      setDay(day);
+      render();
+    });
+    return button;
+  });
+
+  const note = el("textarea", { "aria-label": "本次备注", placeholder: "本次备注" });
+  note.value = state.note;
+  note.addEventListener("input", () => {
+    state.note = note.value;
+    state.dirty = true;
+    paintChrome();
+  });
+
+  const existing = state.sessions[state.date];
+  const banners = [];
+  if (!state.storageOk) {
+    banners.push(el("div", { class: "banner bad", text: "内容不会保存。这台浏览器不允许本地存储。" }));
+  }
+  if (existing) {
+    banners.push(el("div", { class: "banner", text: "这一天已有记录，再次保存会覆盖它。" }));
+  }
+  const shoulderWarn = el("div", {
+    id: "shoulder-warn",
+    class: state.symptoms.shoulder >= 3 ? "banner" : "banner hidden",
+    text: "左肩已到 3 分或以上：动作中关节痛就停。当天或次日仍这样，或痛超过 24 小时，下次降重量或先跳过。"
+  });
+  banners.push(shoulderWarn);
+
+  app.replaceChildren(
+    ...banners,
+    el("section", { class: "card" }, [
+      el("label", { class: "field", text: "日期" }),
+      dateInput,
+      el("div", { class: "days" }, dayButtons)
+    ]),
+    el("section", { class: "card" }, [
+      el("div", { class: "field", text: "症状，0 到 10" }),
+      symptomControl("calf", "小腿酸胀"),
+      symptomControl("knee", "左膝痛"),
+      symptomControl("shoulder", "左肩痛")
+    ]),
+    el("section", { class: "card" }, state.rows.map(exerciseBlock)),
+    el("section", { class: "card" }, [
+      el("label", { class: "field", text: "本次备注" }),
+      note
+    ])
+  );
+}
+
+function historyEntryLine(entry) {
+  const bits = [entry.zh, entry.w ? entry.w + " lb" : "", (entry.sets || entry.reps) ? (entry.sets || "—") + "×" + (entry.reps || "—") : ""].filter(Boolean);
+  const line = el("div", { class: "mini" });
+  line.appendChild(document.createTextNode(bits.join(" · ")));
+  if (entry.note) {
+    const note = el("div", { class: "hint note-line", text: entry.note });
+    const wrap = el("div", {}, [line, note]);
+    return wrap;
+  }
+  return line;
+}
+
+function renderHistory() {
+  const copyBtn = el("button", { type: "button", text: "复制未同步" });
+  const downloadBtn = el("button", { type: "button", text: "下载未同步" });
+  const allBtn = el("button", { type: "button", text: "导出全部" });
+  const importLabel = el("label", { class: "file-btn", text: "导入" });
+  const importInput = el("input", { type: "file", accept: "application/json,.json" });
+  importInput.style.display = "none";
+  importLabel.appendChild(importInput);
+  copyBtn.addEventListener("click", copyUnsynced);
+  downloadBtn.addEventListener("click", () => downloadJson(unsyncedPayload(), "unsynced.json"));
+  allBtn.addEventListener("click", () => downloadJson({ v: 1, exportedAt: new Date().toISOString(), sessions: sessionList() }, "sessions.json"));
+  importInput.addEventListener("change", () => {
+    const file = importInput.files && importInput.files[0];
+    if (file) importFile(file);
+    importInput.value = "";
+  });
+
+  const series = weightSeries();
+  const trendCard = el("section", { class: "card" }, [
+    el("h2", { text: "重量变化" }),
+    series.length ? null : el("div", { class: "hint", text: "还没有带重量的记录。" }),
+    ...series.map((item) => {
+      const recent = item.points.slice(-8);
+      const first = item.points[0].w;
+      const latest = item.points[item.points.length - 1].w;
+      const delta = Number(latest) - Number(first);
+      let deltaText = "和首次相同";
+      if (Number.isFinite(delta) && delta !== 0) deltaText = (delta > 0 ? "+" : "") + delta + " lb，相对首次";
+      return el("div", { class: "ex" }, [
+        el("div", { class: "spread" }, [
+          el("div", {}, [
+            el("div", { class: "ex-name", text: item.meta.zh }),
+            el("div", { class: "ex-en", text: item.meta.ex })
+          ]),
+          el("div", { class: "delta", text: "最新 " + latest })
+        ]),
+        el("div", { class: "seq", text: recent.map((point) => point.w).join(" → ") }),
+        el("div", { class: "delta", text: deltaText })
+      ]);
+    })
+  ]);
+
+  const docs = sessionList();
+  const listCard = el("section", { class: "card" }, [
+    el("h2", { text: "训练记录" }),
+    docs.length ? null : el("div", { class: "hint", text: "还没有保存过。" }),
+    ...docs.map((doc) => {
+      const summary = el("summary", {}, [
+        el("div", { class: "hist-top" }, [
+          el("div", {}, [
+            el("div", { class: "ex-name", text: doc.date + " · " + (doc.day || "") }),
+            el("div", { class: "ex-en", text: (doc.entries || []).length + " 个动作" })
+          ]),
+          el("span", { class: doc.synced ? "pill ok" : "pill", text: doc.synced ? "已同步" : "未同步" })
+        ])
+      ]);
+      const symptoms = "小腿 " + (doc.symptoms ? doc.symptoms.calf : 0) + " · 左膝 " + (doc.symptoms ? doc.symptoms.knee : 0) + " · 左肩 " + (doc.symptoms ? doc.symptoms.shoulder : 0);
+      const edit = el("button", { class: "linkish", type: "button", text: "在今天页编辑" });
+      edit.addEventListener("click", () => {
+        if (state.dirty && !window.confirm("还有未保存的修改，要离开吗？")) return;
+        state.view = "today";
+        loadForDate(doc.date);
+        render();
+      });
+      const remove = el("button", { class: "linkish", type: "button", text: state.confirmDelete === doc.date ? "确认删除" : "删除" });
+      remove.addEventListener("click", () => {
+        if (state.confirmDelete !== doc.date) {
+          state.confirmDelete = doc.date;
+          render();
+          return;
+        }
+        delete state.sessions[doc.date];
+        state.confirmDelete = "";
+        try {
+          persistStore();
+          setStatus("已删除 " + doc.date, false);
+        } catch (error) {
+          setStatus("删除没有写入这台浏览器。", true);
+        }
+        if (state.date === doc.date) loadForDate(state.date);
+        render();
+      });
+      const body = [
+        el("div", { class: "mini", text: symptoms }),
+        ...(doc.entries || []).map(historyEntryLine),
+        doc.note ? el("div", { class: "hint note-line", text: doc.note }) : null,
+        el("div", { class: "actions" }, [edit, remove])
+      ];
+      return el("details", { class: "session", open: state.confirmDelete === doc.date ? "open" : null }, [summary, ...body]);
+    })
+  ]);
+
+  app.replaceChildren(
+    el("div", { class: "banner quiet", text: "同步到仓库：点「复制未同步」，回到对话说「同步训练记录」并粘贴。写入 CSV 后，用「导入」带回同步回执，这些日期会标成已同步。" }),
+    el("div", { class: "tools" }, [copyBtn, downloadBtn, allBtn, importLabel]),
+    trendCard,
+    listCard
+  );
+}
+
+function unsyncedPayload() {
+  return {
+    v: 1,
+    exportedAt: new Date().toISOString(),
+    sessions: sessionList().filter((doc) => !doc.synced)
+  };
+}
+
+function downloadJson(payload, filename) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const link = el("a", { href: URL.createObjectURL(blob), download: filename });
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  setStatus("已下载 " + filename, false);
+}
+
+async function copyUnsynced() {
+  const text = JSON.stringify(unsyncedPayload(), null, 2);
+  try {
+    await navigator.clipboard.writeText(text);
+    setStatus("未同步记录已复制。回到对话粘贴即可。", false);
+  } catch (error) {
+    downloadJson(unsyncedPayload(), "unsynced.json");
+    setStatus("这台浏览器不能复制，已改为下载 unsynced.json。", true);
+  }
+}
+
+function importPayload(payload) {
+  if (!payload || typeof payload !== "object") throw new Error("格式不对");
+  if (Array.isArray(payload.syncedDates)) {
+    payload.syncedDates.forEach((date) => {
+      if (state.sessions[date]) state.sessions[date].synced = true;
+    });
+    persistStore();
+    return "已把 " + payload.syncedDates.length + " 天标成已同步";
+  }
+  const incoming = Array.isArray(payload) ? payload : (payload.sessions || []);
+  if (!Array.isArray(incoming)) throw new Error("格式不对");
+  let count = 0;
+  incoming.forEach((doc) => {
+    if (!doc || !doc.date) return;
+    const current = state.sessions[doc.date];
+    if (!current || String(doc.updatedAt || "") >= String(current.updatedAt || "")) {
+      state.sessions[doc.date] = doc;
+      count += 1;
+    }
+  });
+  persistStore();
+  return "导入了 " + count + " 天";
+}
+
+function importFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const message = importPayload(JSON.parse(String(reader.result)));
+      loadForDate(state.date);
+      setStatus(message, false);
+      render();
+    } catch (error) {
+      setStatus("导入失败：" + (error && error.message ? error.message : "读不了这个文件"), true);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function paintShoulder() {
+  const warn = document.getElementById("shoulder-warn");
+  if (warn) warn.classList.toggle("hidden", state.symptoms.shoulder < 3);
+}
+
+function setStatus(text, isError) {
+  state.status = text;
+  state.statusErr = !!isError;
+  paintChrome();
+}
+
+function paintChrome() {
+  const today = state.view === "today";
+  document.getElementById("tab-today").setAttribute("aria-selected", today ? "true" : "false");
+  document.getElementById("tab-history").setAttribute("aria-selected", today ? "false" : "true");
+  savebar.classList.toggle("hidden", !today);
+  const count = collectEntries(state.rows).length;
+  saveBtn.disabled = !state.storageOk;
+  saveBtn.textContent = count ? "保存这次训练（" + count + " 个动作）" : "保存这次训练";
+  paintShoulder();
+  statusEl.textContent = state.status;
+  statusEl.classList.toggle("err", state.statusErr);
+  document.getElementById("store-line").textContent = state.storageOk
+    ? "只存在这台浏览器，不会自动进仓库"
+    : "内容不会保存";
+}
+
+function render() {
+  if (state.view === "today") renderToday();
+  else renderHistory();
+  paintChrome();
+}
+
+function save() {
+  if (!state.storageOk) {
+    setStatus("内容不会保存。", true);
+    return;
+  }
+  const doc = buildDoc(state);
+  if (!hasContent(doc)) {
+    setStatus("还没有可保存的内容。勾选完成并填写重量，或记下症状、备注。", true);
+    return;
+  }
+  const previous = state.sessions[doc.date];
+  saveBtn.disabled = true;
+  try {
+    state.sessions[doc.date] = doc;
+    persistStore();
+    state.dirty = false;
+    state.rows = buildRows(state.day, state.date, doc);
+    setStatus("已保存在这台浏览器。" + doc.date + " 标为未同步。", false);
+    render();
+  } catch (error) {
+    if (previous) state.sessions[doc.date] = previous;
+    else delete state.sessions[doc.date];
+    setStatus("保存失败：" + (error && error.message ? error.message : "浏览器拒绝写入"), true);
+    saveBtn.disabled = false;
+  }
+}
+
+function applyTheme(theme) {
+  if (theme) document.documentElement.setAttribute("data-theme", theme);
+  else document.documentElement.removeAttribute("data-theme");
+  const dark = document.documentElement.getAttribute("data-theme") === "dark"
+    || (!document.documentElement.getAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.getElementById("theme-btn").textContent = dark ? "浅色" : "深色";
+}
+
+document.getElementById("tab-today").addEventListener("click", () => {
+  state.view = "today";
+  state.confirmDelete = "";
+  render();
+});
+document.getElementById("tab-history").addEventListener("click", () => {
+  state.view = "history";
+  render();
+});
+document.getElementById("theme-btn").addEventListener("click", () => {
+  const current = document.documentElement.getAttribute("data-theme");
+  const next = current === "dark" ? "light" : current === "light" ? "dark" : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+});
+saveBtn.addEventListener("click", save);
+
+applyTheme(localStorage.getItem(THEME_KEY) || "");
+loadStore();
+loadForDate(state.date);
+render();
+
+function runSelfTest() {
+  const failures = [];
+  const check = (name, cond) => { if (!cond) failures.push(name); };
+  check("tuesday", autoDay("2026-10-13") === "周二");
+  check("thursday", autoDay("2026-10-15") === "周四");
+  check("sunday", autoDay("2026-10-18") === "周日");
+  check("monday defaults tuesday", autoDay("2026-10-12") === "周二");
+  check("day counts", DAYS["周二"].length === 6 && DAYS["周四"].length === 7 && DAYS["周日"].length === 7);
+  const paused = ["Machine Shoulder Press", "Machine Lateral Raise"];
+  check("paused flags", paused.every((ex) => BY_EX[ex].paused));
+  const doc = buildDoc({
+    date: "2026-10-13",
+    day: "周二",
+    symptoms: { calf: 2, knee: 0, shoulder: 4 },
+    note: "  <img src=x onerror=alert(1)>  ",
+    rows: [
+      { ex: "Machine Pulldown", zh: "高位下拉机", done: true, open: true, paused: false, w: "40", sets: "2", reps: "10", note: "<b>hi</b>" },
+      { ex: "Machine Chest Press", zh: "坐姿推胸机", done: true, open: true, paused: false, w: "  ", sets: "2", reps: "10", note: "" },
+      { ex: "Machine Leg Press", zh: "腿举机", done: false, open: true, paused: false, w: "70", sets: "2", reps: "10", note: "" },
+      { ex: "Machine Shoulder Press", zh: "肩部推举机", done: true, open: false, paused: true, w: "10", sets: "1", reps: "8", note: "" }
+    ]
+  });
+  check("only completed weighted", doc.entries.length === 1 && doc.entries[0].ex === "Machine Pulldown");
+  check("note trimmed", doc.note.indexOf("<img") === 0);
+  check("synced false", doc.synced === false && doc.v === 1);
+  check("shoulder score", doc.symptoms.shoulder === 4);
+  state.sessions = {
+    "2026-10-13": { v: 1, date: "2026-10-13", day: "周二", symptoms: { calf: 1, knee: 0, shoulder: 0 }, entries: [{ ex: "Machine Pulldown", zh: "高位下拉机", w: "40", sets: "2", reps: "10", note: "" }], note: "", synced: true, updatedAt: "2026-10-13T12:00:00.000Z" }
+  };
+  const rows = buildRows("周二", "2026-10-20", null);
+  const pulldown = rows.find((row) => row.ex === "Machine Pulldown");
+  const press = buildRows("周四", "2026-10-22", null).find((row) => row.ex === "Machine Shoulder Press");
+  check("prefill previous", pulldown && pulldown.w === "40" && pulldown.source === "prev" && pulldown.done === false);
+  check("start weight", rows.find((row) => row.ex === "Machine Chest Press").source === "start");
+  check("paused collapsed", press && press.open === false && press.paused === true);
+  const host = document.createElement("div");
+  host.appendChild(historyEntryLine({ zh: "高位下拉机", w: "40", sets: "2", reps: "10", note: "<img src=x>" }));
+  check("note is text", host.querySelector("img") == null && host.textContent.indexOf("<img") >= 0);
+  const report = document.createElement("pre");
+  report.id = "selftest";
+  report.textContent = failures.length ? "FAIL " + failures.join(", ") : "PASS";
+  document.body.appendChild(report);
+}
+
+if (new URLSearchParams(location.search).get("selftest") === "1") runSelfTest();
+</script>
+</body>
+</html>
